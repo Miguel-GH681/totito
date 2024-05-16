@@ -16,12 +16,13 @@ moveController = MoveController()
 def main():
 
     option = 0
-    while option != 2:
+    while option != 3:
         os.system('clear')
         print('---------------------')
         print('|    Menú principal  |')
         print('| 1. Carga inicial   |')
-        print('| 2. Salir           |')
+        print('| 2. Recorrido int.  |')
+        print('| 3. Salir           |')
         print('---------------------')
         option = int(input('Ingrese una opción: '))
         
@@ -43,6 +44,9 @@ def main():
                 print('Ha ocurrido un error, inténtelo nuevamente')
                 input('Presione enter para continuar')
         elif option == 2:
+            treeController.list()
+            input('Presione enter para continuar')
+        elif option == 3:
             print('Cerrando programa...')
         else:
             print('Ingrese una opción válida')

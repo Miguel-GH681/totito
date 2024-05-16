@@ -38,6 +38,22 @@ class TreeController:
             return self._find(root.left, value)
         else:
             return self._find(root.right, value)
+        
+    def list(self):
+        self._list(self.root)
+
+    def _list(self, root: Node):
+        if root != None:
+            self._list(root.left)
+            print(root.value.tree.value.score)
+            self._list2(root.value.tree)
+            self._list(root.right)
+
+    def _list2(self, root):
+        if root != None:
+            self._list2(root.left)
+            print(root.value.score)
+            self._list2(root.right)
     
 
     def getGraph(self):
