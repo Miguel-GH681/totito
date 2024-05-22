@@ -11,42 +11,54 @@ from move_controller import MoveController
 from tree_controller import TreeController
 
 treeController = TreeController()
-moveController = MoveController()
+movement_controller = MoveController()
 
 def main():
 
     option = 0
-    while option != 3:
+    while option != 6:
         os.system('clear')
         print('---------------------')
         print('|    Menú principal  |')
         print('| 1. Carga inicial   |')
-        print('| 2. Recorrido int.  |')
-        print('| 3. Salir           |')
+        print('| 2. Recorrido mov.  |')
+        print('| 4. Buscar          |')
+        print('| 5. Eliminar        |')
+        print('| 6. Salir           |')
         print('---------------------')
         option = int(input('Ingrese una opción: '))
         
         if option == 1:
             try:
-                myPath = os.path.join(os.getcwd(), 'db', 'data.csv')
-                with open(myPath, 'r', newline='') as csvfile:
-                    csv_reader = csv.DictReader(csvfile)
+                dbPath = os.path.join(os.getcwd(), 'db', 'data.csv')
+                with open(dbPath, 'r', newline='') as csv_file:
+                    csv_reader = csv.DictReader(csv_file)
                     for i, row in enumerate(csv_reader):
-                        moveController.insert(Cell(int(row['score']), row['taken'], int(row['x']), int(row['y'])))
+                        movement_controller.insert(Cell(int(row['score']), row['taken'], int(row['x']), int(row['y'])))
                         if( ((i+1)%3) == 0):
-                            moves = moveController.getMoves()
-                            score = (i * 10)
-                            treeController.insert(Tree(moves, score))
-                            moveController.clear()
+                            moves = movement_controller.getMoves()
+                            movement_score = (i * 100)
+                            treeController.insert(Tree(moves, movement_score))
+                            movement_controller.clearMoves()
                 treeController.getGraph()
                 input('Presione enter para continuar')
             except:
                 print('Ha ocurrido un error, inténtelo nuevamente')
                 input('Presione enter para continuar')
         elif option == 2:
-            treeController.list()
+            treeController.list_movements()
             input('Presione enter para continuar')
-        elif option == 3:
+        elif option == 4:
+            treeController.configure_cells(50, False)
+            treeController.get_nodes_found()
+            treeController.builder()
+            treeController.getGraph()
+            input('Presione enter para continuar')
+        elif option == 5:
+            treeController.eliminar(1400)
+            treeController.getGraph()
+            input('Presione enter para continuar')
+        elif option == 6:
             print('Cerrando programa...')
         else:
             print('Ingrese una opción válida')

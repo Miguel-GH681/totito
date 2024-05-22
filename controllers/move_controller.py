@@ -50,7 +50,7 @@ class MoveController:
     def getMoves(self):
         return self.root
     
-    def clear(self):
+    def clearMoves(self):
         self.root = None
 
     def getGraph(self):
