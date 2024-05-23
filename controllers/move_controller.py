@@ -53,11 +53,11 @@ class MoveController:
     def clearMoves(self):
         self.root = None
 
-    def getGraph(self):
+    def getGraph(self, name):
         dot = graphviz.Digraph()
         self._getGraph(self.root, dot)
 
-        out_file = "moves.dot"
+        out_file = name
         dot.render(out_file, format='png', cleanup=True)
         
     def _getGraph(self, root: Node, dot: graphviz.Digraph):

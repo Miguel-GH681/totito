@@ -39,8 +39,9 @@ def main():
                             moves = movement_controller.getMoves()
                             movement_score = (i * 100)
                             treeController.insert(Tree(moves, movement_score))
+                            movement_controller.getGraph("{0}".format(movement_score))
                             movement_controller.clearMoves()
-                treeController.getGraph()
+                treeController.getGraph("tree.dot")
                 input('Presione enter para continuar')
             except:
                 print('Ha ocurrido un error, inténtelo nuevamente')
@@ -49,14 +50,16 @@ def main():
             treeController.list_movements()
             input('Presione enter para continuar')
         elif option == 4:
-            treeController.configure_cells(50, False)
-            treeController.get_nodes_found()
+            jugada = int(input("Ingrese su casilla: "))
+            treeController.configure_cells(jugada, False)
+            treeController.getMaxValue()
             treeController.builder()
-            treeController.getGraph()
+            treeController.getFirstValue()
+            treeController.getGraph("tree.dot")
             input('Presione enter para continuar')
         elif option == 5:
             treeController.eliminar(1400)
-            treeController.getGraph()
+            treeController.getGraph("tree.dot")
             input('Presione enter para continuar')
         elif option == 6:
             print('Cerrando programa...')

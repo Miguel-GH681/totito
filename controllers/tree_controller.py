@@ -35,7 +35,6 @@ class TreeController:
         if root is None:
             return None
         elif value == root.value.score:
-            print(root.value)
             return root
         elif value < root.value.score:
             return self._find_cell(root.left, value)
@@ -66,9 +65,9 @@ class TreeController:
         if root != None:
             self._configure_cells(root.left, score, cpu)
             finded = self.find_cell(root.value.tree ,score)
-            restructuring_factor = -400 if (finded != None and cpu) else (400 if (finded != None and cpu is False) else 0)
+            restructuring_factor = -self.getMaxValue() if (finded != None and cpu) else (self.getMaxValue() if (finded != None and cpu is False) else 0)
             if restructuring_factor != 0:
-                fc.insert(Factor(root.value.score, restructuring_factor, finded))
+                fc.insert(Factor(root.value.score, restructuring_factor, root.value.tree, (root.value.pieces + 1), True))
             self._configure_cells(root.right, score, cpu)
 
     def get_nodes_found(self):
@@ -80,7 +79,10 @@ class TreeController:
             factor = fc.getLast()
             if factor is not None:
                 self.eliminar(factor.score)
-                self.insert(Tree(factor.movements, (factor.score+(factor.factor))))
+                new_tree: Tree = Tree(factor.movements, (factor.score+(factor.factor))) 
+                new_tree.pieces = factor.pieces
+                new_tree.taken = factor.taken
+                self.insert(new_tree)
                 fc.eliminar(factor.score)
 
     def eliminar(self, valor):
@@ -114,17 +116,34 @@ class TreeController:
         while actual.left is not None:
             actual = actual.left
         return actual
+    
+    def getMaxValue(self):
+        return self._getMaxValue(self.root.right)
+    
+    def _getMaxValue(self, root):
+        current = root
+        while current.right is not None:
+            current = current.right
+        return current.value.score
+    
+    def getFirstValue(self):
+        # return self.root.value
+        if(self.root.value.taken is True):
+            return None
+        else:
+            self.root.value.pieces += 1
+            return self._getMaxValue(self.root.value.tree)
 
-    def getGraph(self):
+    def getGraph(self, name):
         dot = graphviz.Digraph()
         self._getGraph(self.root, dot)
 
-        out_file = "tree.dot"
+        out_file = name
         dot.render(out_file, format='png', cleanup=True)
         
     def _getGraph(self, root: Node, dot: graphviz.Digraph):
         if root is not None:
-            dot.node(str(root.value.score), "{0}".format(root.value.score))
+            dot.node(str(root.value.score), "{0} - {1} - {2}".format(root.value.score, root.value.pieces, root.value.taken))
             if root.left is not None:
                 dot.edge(str(root.value.score), str(root.left.value.score))
                 self._getGraph(root.left, dot)
