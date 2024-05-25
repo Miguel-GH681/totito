@@ -22,7 +22,7 @@ def main():
         print('|    Menú principal  |')
         print('| 1. Carga inicial   |')
         print('| 2. Recorrido mov.  |')
-        print('| 4. Buscar          |')
+        print('| 4. Jugar           |')
         print('| 5. Eliminar        |')
         print('| 6. Salir           |')
         print('---------------------')
@@ -53,8 +53,13 @@ def main():
             jugada = int(input("Ingrese su casilla: "))
             treeController.configure_cells(jugada, False)
             treeController.getMaxValue()
-            treeController.builder()
-            treeController.getFirstValue()
+            is_winner = treeController.builder()
+            if is_winner:
+                print("felicidades ha ganado 'X'")
+            else:
+                pc_election = treeController.getFirstValue()
+                print('Eleccion de la pc: ', pc_election)
+            
             treeController.getGraph("tree.dot")
             input('Presione enter para continuar')
         elif option == 5:

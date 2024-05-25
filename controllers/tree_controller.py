@@ -4,6 +4,7 @@ import graphviz
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 
+from cell import Cell
 from tree import Tree
 from node import Node
 from factor import Factor
@@ -75,6 +76,7 @@ class TreeController:
 
     def builder(self):
         factor: Factor = 0
+        is_winner = False
         while factor != None:
             factor = fc.getLast()
             if factor is not None:
@@ -84,6 +86,12 @@ class TreeController:
                 new_tree.taken = factor.taken
                 self.insert(new_tree)
                 fc.eliminar(factor.score)
+
+            if factor is not None and factor.pieces == 3:
+                is_winner = True
+                break
+
+        return is_winner
 
     def eliminar(self, valor):
         self.root = self._eliminar(self.root, valor)
@@ -131,8 +139,12 @@ class TreeController:
         if(self.root.value.taken is True):
             return None
         else:
+            #Falta que elija posiciones y no unicamente nodos
             self.root.value.pieces += 1
-            return self._getMaxValue(self.root.value.tree)
+            max_value = self._getMaxValue(self.root.value.tree)
+            self.root.value.tree = self.eliminar_int(self.root.value.tree, max_value)
+            self.root.value.tree = self.insert_int(self.root.value.tree, Cell((max_value-(max_value*2)), None, None, None))
+            return max_value
 
     def getGraph(self, name):
         dot = graphviz.Digraph()
@@ -150,3 +162,37 @@ class TreeController:
             if root.right is not None:
                 dot.edge(str(root.value.score), str(root.right.value.score))
                 self._getGraph(root.right, dot)
+
+
+    def eliminar_int(self, root, valor: int):
+        if root is None:
+            return root
+
+        if valor < root.value.score:
+            root.left = self._eliminar(root.left, valor)
+        elif valor > root.value.score:
+            root.right = self._eliminar(root.right, valor)
+        else:
+            if root.left is None:
+                temp = root.right
+                root = None
+                return temp
+            elif root.right is None:
+                temp = root.left
+                root = None
+                return temp
+            
+            temp = self._valor_minimo(root.right)
+            root.value.score = temp.value.score
+            root.right = self._eliminar(root.right, temp.value.score)
+        return root
+
+
+    def insert_int(self, root: Node, value: Cell):
+        if root is None:
+            return Node(value)
+        elif value.score < root.value.score:
+            root.left = self._insert(root.left, value)
+        elif value.score > root.value.score:
+            root.right = self._insert(root.right, value)
+        return root
