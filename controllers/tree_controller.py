@@ -18,6 +18,7 @@ class TreeController:
 
     def __init__(self):
         self.root = None
+        self.last_movement = None
 
     def insert(self, value : Tree):
         self.root = self._insert(self.root, value)
@@ -70,7 +71,8 @@ class TreeController:
             finded = self.find_cell(root.value.tree ,score)
             restructuring_factor = -self.getMaxValue() if (finded != None and cpu) else (self.getMaxValue() if (finded != None and cpu is False) else 0)
             if restructuring_factor != 0:
-                fc.insert(Factor(root.value.score, restructuring_factor, root.value.tree, (root.value.pieces + 1), True, root.value.name))
+                pieces_played = 1 if root.value.taken == False else (root.value.pieces + 1)
+                fc.insert(Factor(root.value.score, restructuring_factor, root.value.tree, pieces_played, True, root.value.name))
             self._configure_cells(root.right, score, cpu)
 
     def get_nodes_found(self):
@@ -149,9 +151,14 @@ class TreeController:
             return None
         else:
             max_value = self._getTakenValue(self.root.value.tree, self.root.value.pieces)
+            if self.last_movement == max_value:
+                self.root.value.pieces += 1
+                max_value = self._getTakenValue(self.root.value.tree, self.root.value.pieces)
+
             self.root.value.pieces += 1
             movement_controller._listMoves(self.root.value.tree)
-            return max_value
+            self.last_movement = max_value
+            return [max_value, self.root.value.pieces]
 
     def getGraph(self, name):
         dot = graphviz.Digraph()
@@ -169,37 +176,3 @@ class TreeController:
             if root.right is not None:
                 dot.edge(str(root.value.score), str(root.right.value.score))
                 self._getGraph(root.right, dot)
-
-
-    def eliminar_int(self, root, valor: int):
-        if root is None:
-            return root
-
-        if valor < root.value.score:
-            root.left = self._eliminar(root.left, valor)
-        elif valor > root.value.score:
-            root.right = self._eliminar(root.right, valor)
-        else:
-            if root.left is None:
-                temp = root.right
-                root = None
-                return temp
-            elif root.right is None:
-                temp = root.left
-                root = None
-                return temp
-            
-            temp = self._valor_minimo(root.right)
-            root.value = temp.value
-            root.right = self._eliminar(root.right, temp.value.score)
-        return root
-
-
-    def insert_int(self, root: Node, value: Cell):
-        if root is None:
-            return Node(value)
-        elif value.score < root.value.score:
-            root.left = self._insert(root.left, value)
-        elif value.score > root.value.score:
-            root.right = self._insert(root.right, value)
-        return root

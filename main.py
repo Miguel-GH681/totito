@@ -57,7 +57,9 @@ def main():
                 print("felicidades ha ganado 'X'")
             else:
                 pc_election = treeController.getFirstValue()
-                print('Eleccion de la pc: ', pc_election)
+                print('Eleccion de la pc: ', pc_election[0])
+                if pc_election[1] == 3:
+                    print("Felicidades ha ganado 'O'")
             
             treeController.getGraph("tree.dot")
             input('Presione enter para continuar')
