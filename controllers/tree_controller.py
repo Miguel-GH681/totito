@@ -9,8 +9,10 @@ from tree import Tree
 from node import Node
 from factor import Factor
 from factor_controller import FactorController
+from move_controller import MoveController
 
 fc = FactorController()
+movement_controller = MoveController()
 
 class TreeController:
 
@@ -56,7 +58,7 @@ class TreeController:
     def _list_movements_body(self, root):
         if root != None:
             self._list_movements_body(root.left)
-            print(root.value.score)
+            print("{0} - {1}".format(root.value.score, root.value.taken))
             self._list_movements_body(root.right) 
 
     def configure_cells(self, score: int, cpu: bool):
@@ -68,7 +70,7 @@ class TreeController:
             finded = self.find_cell(root.value.tree ,score)
             restructuring_factor = -self.getMaxValue() if (finded != None and cpu) else (self.getMaxValue() if (finded != None and cpu is False) else 0)
             if restructuring_factor != 0:
-                fc.insert(Factor(root.value.score, restructuring_factor, root.value.tree, (root.value.pieces + 1), True))
+                fc.insert(Factor(root.value.score, restructuring_factor, root.value.tree, (root.value.pieces + 1), True, root.value.name))
             self._configure_cells(root.right, score, cpu)
 
     def get_nodes_found(self):
@@ -81,7 +83,7 @@ class TreeController:
             factor = fc.getLast()
             if factor is not None:
                 self.eliminar(factor.score)
-                new_tree: Tree = Tree(factor.movements, (factor.score+(factor.factor))) 
+                new_tree: Tree = Tree(factor.movements, (factor.score+(factor.factor)), factor.name) 
                 new_tree.pieces = factor.pieces
                 new_tree.taken = factor.taken
                 self.insert(new_tree)
@@ -134,16 +136,21 @@ class TreeController:
             current = current.right
         return current.value.score
     
+    def _getTakenValue(self, root, pos):
+        current = root
+        current_pos = pos
+        while current.left is not None and current_pos != 0:
+            current = current.left
+            current_pos -= 1
+        return current.value.score
+    
     def getFirstValue(self):
-        # return self.root.value
         if(self.root.value.taken is True):
             return None
         else:
-            #Falta que elija posiciones y no unicamente nodos
+            max_value = self._getTakenValue(self.root.value.tree, self.root.value.pieces)
             self.root.value.pieces += 1
-            max_value = self._getMaxValue(self.root.value.tree)
-            self.root.value.tree = self.eliminar_int(self.root.value.tree, max_value)
-            self.root.value.tree = self.insert_int(self.root.value.tree, Cell((max_value-(max_value*2)), None, None, None))
+            movement_controller._listMoves(self.root.value.tree)
             return max_value
 
     def getGraph(self, name):
@@ -155,7 +162,7 @@ class TreeController:
         
     def _getGraph(self, root: Node, dot: graphviz.Digraph):
         if root is not None:
-            dot.node(str(root.value.score), "{0} - {1} - {2}".format(root.value.score, root.value.pieces, root.value.taken))
+            dot.node(str(root.value.score), "{0} - {1} - {2}".format(root.value.name, root.value.pieces, root.value.taken))
             if root.left is not None:
                 dot.edge(str(root.value.score), str(root.left.value.score))
                 self._getGraph(root.left, dot)
@@ -183,7 +190,7 @@ class TreeController:
                 return temp
             
             temp = self._valor_minimo(root.right)
-            root.value.score = temp.value.score
+            root.value = temp.value
             root.right = self._eliminar(root.right, temp.value.score)
         return root
 

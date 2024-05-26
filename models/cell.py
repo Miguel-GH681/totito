@@ -7,8 +7,6 @@
         taken - Tipo de ficha que ocupa la celda ('X' u 'O')
 """
 class Cell:
-    def __init__(self, score, taken, x, y):
+    def __init__(self, score, taken):
         self.score = score
-        self.x = x
-        self.y = y
         self.taken = taken

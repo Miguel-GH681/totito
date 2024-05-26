@@ -34,11 +34,11 @@ def main():
                 with open(dbPath, 'r', newline='') as csv_file:
                     csv_reader = csv.DictReader(csv_file)
                     for i, row in enumerate(csv_reader):
-                        movement_controller.insert(Cell(int(row['score']), row['taken'], int(row['x']), int(row['y'])))
+                        movement_controller.insert(Cell(int(row['score']), row['taken']))
                         if( ((i+1)%3) == 0):
                             moves = movement_controller.getMoves()
                             movement_score = (i * 100)
-                            treeController.insert(Tree(moves, movement_score))
+                            treeController.insert(Tree(moves, movement_score, movement_score))
                             movement_controller.getGraph("{0}".format(movement_score))
                             movement_controller.clearMoves()
                 treeController.getGraph("tree.dot")
@@ -52,7 +52,6 @@ def main():
         elif option == 4:
             jugada = int(input("Ingrese su casilla: "))
             treeController.configure_cells(jugada, False)
-            treeController.getMaxValue()
             is_winner = treeController.builder()
             if is_winner:
                 print("felicidades ha ganado 'X'")

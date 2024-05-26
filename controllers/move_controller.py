@@ -44,7 +44,7 @@ class MoveController:
     def _listMoves(self, root):
         if root != None:
             self._listMoves(root.left)
-            print(root.value.score)
+            print("{0} - {1}".format(root.value.score, root.value.taken))
             self._listMoves(root.right)
 
     def getMoves(self):
@@ -62,11 +62,11 @@ class MoveController:
         
     def _getGraph(self, root: Node, dot: graphviz.Digraph):
         if root is not None:
-            dot.node(str(root.value.score))
+            dot.node(str(root.value.score), "{0} - {1}".format(root.value.score, root.value.taken))
             if root.left is not None:
                 dot.edge(str(root.value.score), str(root.left.value.score))
                 self._getGraph(root.left, dot)
-            if root.right is not None:
+            elif root.right is not None:
                 dot.edge(str(root.value.score), str(root.right.value.score))
                 self._getGraph(root.right.value, dot)
         
