@@ -1,5 +1,6 @@
 import os
 import sys
+import csv
 import graphviz
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
@@ -19,6 +20,7 @@ class TreeController:
     def __init__(self):
         self.root = None
         self.last_movement = None
+        self.lost_movement = None
 
     def insert(self, value : Tree):
         self.root = self._insert(self.root, value)
@@ -73,6 +75,8 @@ class TreeController:
             if restructuring_factor != 0:
                 pieces_played = 1 if root.value.taken == False else (root.value.pieces + 1)
                 fc.insert(Factor(root.value.score, restructuring_factor, root.value.tree, pieces_played, True, root.value.name))
+            if root.value.taken == False and root.value.pieces == 2:
+                self.lost_movement = (root.value.score + (restructuring_factor))
             self._configure_cells(root.right, score, cpu)
 
     def get_nodes_found(self):
@@ -169,10 +173,89 @@ class TreeController:
         
     def _getGraph(self, root: Node, dot: graphviz.Digraph):
         if root is not None:
-            dot.node(str(root.value.score), "{0} - {1} - {2}".format(root.value.name, root.value.pieces, root.value.taken))
+            dot.node(str(root.value.score), "{0} - {1} - {2} - {3}".format(root.value.name, root.value.pieces, root.value.taken, root.value.score))
             if root.left is not None:
                 dot.edge(str(root.value.score), str(root.left.value.score))
                 self._getGraph(root.left, dot)
             if root.right is not None:
                 dot.edge(str(root.value.score), str(root.right.value.score))
                 self._getGraph(root.right, dot)
+
+    def init_game(self):
+        if self.root is None:
+            dbPath = os.path.join(os.getcwd(), 'db', 'data.csv')
+            with open(dbPath, 'r', newline='') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                for i, row in enumerate(csv_reader):
+                    movement_controller.insert(Cell(int(row['score']), row['taken']))
+                    if( ((i+1)%3) == 0):
+                        moves = movement_controller.getMoves()
+                        movement_score = (i * 100)
+                        self.insert(Tree(moves, movement_score, movement_score))
+                        movement_controller.getGraph("{0}".format(movement_score))
+                        movement_controller.clearMoves()
+
+    def get_cpu_movement(self, cell: int, first_player: bool):
+        self.configure_cells(cell, first_player)
+        is_winner = self.builder()
+        print("Movimiento perdedor: {0}".format(self.lost_movement))
+        if is_winner:
+            print("felicidades ha ganado 'X'")
+            return [True, -1]
+        else:
+            pc_election = self.getFirstValue()
+            if pc_election != None:
+                print('Eleccion de la pc: ', pc_election[0])
+                if pc_election[1] == 3:
+                    print("Felicidades ha ganado 'O'")
+                    return [True, pc_election[0]]            
+                return [False, pc_election[0]]
+            else:
+                return [False, -1]
+        
+    def clear_data(self):
+        self.last_movement = None
+        self._clear_data(self.root)
+        self._builder()
+        self.clear_lost_movement(self.lost_movement)
+        self.lost_movement = None
+
+    def _clear_data(self, root):
+        if root != None:
+            self._clear_data(root.left)
+            fc.insert(Factor(root.value.score, 0, root.value.tree, 0, False, root.value.name))
+            self._clear_data(root.right)
+
+    def _builder(self):
+        factor: Factor = 0
+        while factor != None:
+            factor = fc.getLast()
+            if factor is not None:
+                self.eliminar(factor.score)
+                new_tree: Tree = Tree(factor.movements, (factor.score+(factor.factor)), factor.name) 
+                new_tree.pieces = factor.pieces
+                new_tree.taken = factor.taken
+                self.insert(new_tree)
+                fc.eliminar(factor.score)
+
+    def clear_lost_movement(self, score):
+        self._clear_data_2(self.root, score)
+        factor: Factor = 0
+        while factor != None:
+            factor = fc.getLast()
+            print("Mi factor: {0}".format(factor))
+            if factor is not None:
+                self.eliminar(factor.score)
+                new_tree: Tree = Tree(factor.movements, (factor.score+(factor.factor)), factor.name)
+                new_tree.pieces = factor.pieces
+                new_tree.taken = factor.taken
+                self.insert(new_tree)
+                fc.eliminar(factor.score)
+
+
+    def _clear_data_2(self, root, score):
+        if root != None:
+            self._clear_data_2(root.left, score)
+            if root.value.score == score:
+                fc.insert(Factor(root.value.score, self.getMaxValue(), root.value.tree, 0, False, root.value.name))
+            self._clear_data_2(root.right, score)
