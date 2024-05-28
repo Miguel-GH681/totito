@@ -8,6 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
 from cell import Cell
 from tree import Tree
 from node import Node
+from simple_node import SimpleNode
 from factor import Factor
 from factor_controller import FactorController
 from move_controller import MoveController
@@ -46,23 +47,6 @@ class TreeController:
             return self._find_cell(root.left, value)
         else:
             return self._find_cell(root.right, value)
-                
-        
-    def list_movements(self):
-        self._list_movements_header(self.root)
- 
-    def _list_movements_header(self, root: Node):
-        if root != None:
-            self._list_movements_header(root.left)
-            print('----------')
-            self._list_movements_body(root.value.tree)
-            self._list_movements_header(root.right)
-
-    def _list_movements_body(self, root):
-        if root != None:
-            self._list_movements_body(root.left)
-            print("{0} - {1}".format(root.value.score, root.value.taken))
-            self._list_movements_body(root.right) 
 
     def configure_cells(self, score: int, cpu: bool):
         self._configure_cells(self.root, score, cpu)
@@ -78,9 +62,6 @@ class TreeController:
             if root.value.taken == False and root.value.pieces == 2:
                 self.lost_movement = (root.value.score + (restructuring_factor))
             self._configure_cells(root.right, score, cpu)
-
-    def get_nodes_found(self):
-        fc.list()
 
     def builder(self):
         factor: Factor = 0
@@ -155,13 +136,15 @@ class TreeController:
             return None
         else:
             max_value = self._getTakenValue(self.root.value.tree, self.root.value.pieces)
-            if self.last_movement == max_value:
-                self.root.value.pieces += 1
+            if self.get_last_movement_true(max_value):
+                self.get_last_movements(self.root.value.tree)
                 max_value = self._getTakenValue(self.root.value.tree, self.root.value.pieces)
 
             self.root.value.pieces += 1
-            movement_controller._listMoves(self.root.value.tree)
-            self.last_movement = max_value
+            new_last_movement = SimpleNode(max_value)
+            new_last_movement.next = self.last_movement
+            self.last_movement = new_last_movement
+
             return [max_value, self.root.value.pieces]
 
     def getGraph(self, name):
@@ -198,7 +181,6 @@ class TreeController:
     def get_cpu_movement(self, cell: int, first_player: bool):
         self.configure_cells(cell, first_player)
         is_winner = self.builder()
-        print("Movimiento perdedor: {0}".format(self.lost_movement))
         if is_winner:
             print("felicidades ha ganado 'X'")
             return [True, -1]
@@ -259,3 +241,41 @@ class TreeController:
             if root.value.score == score:
                 fc.insert(Factor(root.value.score, self.getMaxValue(), root.value.tree, 0, False, root.value.name))
             self._clear_data_2(root.right, score)
+
+    def get_last_movement_true(self, value):
+        current = self.last_movement
+        exists = False
+
+        while current:
+            if value == current.value:
+                exists = True
+                break
+            current = current.next
+
+        return exists
+
+    def get_last_movements(self, root):
+        exists = 0
+
+        if root != None:
+            self.get_last_movements(root.left)
+            if self.get_last_movement_true(root.value.score):
+                self.get_last_movement(root.value.score)
+            self.get_last_movements(root.right)
+
+        return exists
+
+
+    def get_last_movement(self, value):
+        current = self.last_movement
+        exists = False
+
+        while current:
+            if value == current.value:
+                self.root.value.pieces += 1
+                print(self.root.value.pieces)
+            current = current.next
+
+        return exists
+    
+    #Retornar la que no esta y no la ultima

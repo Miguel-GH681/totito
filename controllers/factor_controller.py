@@ -54,12 +54,3 @@ class FactorController:
             root.value.score = temp.value.score
             root.right = self._eliminar(root.right, temp.value.score)
         return root
-    
-    def list(self):
-        self._list(self.root)
- 
-    def _list(self, root: Node):
-        if root != None:
-            self._list(root.left)
-            print("{0} - {1}".format(root.value.score, root.value.factor))
-            self._list(root.right)
