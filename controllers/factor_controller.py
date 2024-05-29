@@ -16,6 +16,18 @@ class FactorController:
         elif value.score > root.value.score:
             root.right = self._insert(root.right, value)
         return root
+    
+    def getFirst(self):
+        return self._get_first(self.root)
+    
+    def _get_first(self, root: Node):
+        if root:
+            actual:Node = root
+            while actual.right is not None:
+                actual = actual.right
+            return actual.value
+        else:
+            return None
 
     def getLast(self):
         return self._getLast(self.root)

@@ -123,7 +123,7 @@ class TreeController:
             current = current.right
         return current.value.score
     
-    def _getTakenValue(self, root, pos):
+    def get_first_cell(self, root, pos):
         current = root
         current_pos = pos
         while current.left is not None and current_pos != 0:
@@ -131,15 +131,18 @@ class TreeController:
             current_pos -= 1
         return current.value.score
     
-    def getFirstValue(self):
+    def get_cpu_election(self):
         if(self.root.value.taken is True):
             return None
         else:
-            max_value = self._getTakenValue(self.root.value.tree, self.root.value.pieces)
-            if self.get_last_movement_true(max_value):
+            max_value = self.get_first_cell(self.root.value.tree, self.root.value.pieces)
+            if self.compare_cells_played(max_value)[1]:
                 self.get_last_movements(self.root.value.tree)
-                max_value = self._getTakenValue(self.root.value.tree, self.root.value.pieces)
+                self.root.value.pieces += 1
+                tmp = fc.getFirst()
+                max_value = tmp.score
 
+            fc.root = None
             self.root.value.pieces += 1
             new_last_movement = SimpleNode(max_value)
             new_last_movement.next = self.last_movement
@@ -185,7 +188,7 @@ class TreeController:
             print("felicidades ha ganado 'X'")
             return [True, -1]
         else:
-            pc_election = self.getFirstValue()
+            pc_election = self.get_cpu_election()
             if pc_election != None:
                 print('Eleccion de la pc: ', pc_election[0])
                 if pc_election[1] == 3:
@@ -242,7 +245,7 @@ class TreeController:
                 fc.insert(Factor(root.value.score, self.getMaxValue(), root.value.tree, 0, False, root.value.name))
             self._clear_data_2(root.right, score)
 
-    def get_last_movement_true(self, value):
+    def compare_cells_played(self, value):
         current = self.last_movement
         exists = False
 
@@ -250,17 +253,20 @@ class TreeController:
             if value == current.value:
                 exists = True
                 break
-            current = current.next
-
-        return exists
+            else:
+                current = current.next
+            
+        return [value, exists]
 
     def get_last_movements(self, root):
         exists = 0
 
         if root != None:
             self.get_last_movements(root.left)
-            if self.get_last_movement_true(root.value.score):
-                self.get_last_movement(root.value.score)
+            value = self.compare_cells_played(root.value.score)
+            if value[1] is False:
+                print(value[0])
+                fc.insert(Factor(value[0], None, None, None, None, None))
             self.get_last_movements(root.right)
 
         return exists
