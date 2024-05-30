@@ -30,10 +30,12 @@ class TotitoApi:
 
         results = tree_controller.get_cpu_movement(cell, cpu_first_player)
         tree_controller.getGraph("tree.dot")
+        url = tree_controller.upload_images("tree.dot.png")
 
         return jsonify({
                 'isWinner': results[0],
-                'cpu_movement': results[1]
+                'cpu_movement': results[1],
+                "tree_url": url
             })
 
     @app.route('/reset_game', methods=['GET'])
