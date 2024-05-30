@@ -149,8 +149,8 @@ class TreeController:
         else:
             max_value = self.get_first_cell(self.root.value.tree, self.root.value.pieces)
             if self.compare_cells_played(max_value)[1]:
+                self.root.value.pieces = 0
                 self.get_last_movements(self.root.value.tree)
-                self.root.value.pieces += 1
                 tmp = fc.getFirst()
                 max_value = tmp.score
 
@@ -263,6 +263,7 @@ class TreeController:
 
         while current:
             if value == current.value:
+                self.root.value.pieces += 1
                 exists = True
                 break
             else:
@@ -271,8 +272,6 @@ class TreeController:
         return [value, exists]
 
     def get_last_movements(self, root):
-        exists = 0
-
         if root != None:
             self.get_last_movements(root.left)
             value = self.compare_cells_played(root.value.score)
@@ -280,9 +279,6 @@ class TreeController:
                 print(value[0])
                 fc.insert(Factor(value[0], None, None, None, None, None))
             self.get_last_movements(root.right)
-
-        return exists
-
 
     def get_last_movement(self, value):
         current = self.last_movement
