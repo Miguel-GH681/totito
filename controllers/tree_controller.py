@@ -171,7 +171,7 @@ class TreeController:
         
     def _getGraph(self, root: Node, dot: graphviz.Digraph):
         if root is not None:
-            dot.node(str(root.value.score), "{0} - {1} - {2}".format(root.value.name, root.value.pieces, root.value.score))
+            dot.node(str(root.value.score), "{0} - {1}".format(root.value.name, root.value.score))
             if root.left is not None:
                 dot.edge(str(root.value.score), str(root.left.value.score))
                 self._getGraph(root.left, dot)

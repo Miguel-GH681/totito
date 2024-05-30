@@ -43,10 +43,26 @@ class TotitoApi:
     def reset_game():
         tree_controller.clear_data()
         tree_controller.getGraph("tree.dot")
+        url = tree_controller.upload_images("tree.dot.png")
 
         return jsonify({
-            'message': 'Juego reiniciado correctamente'
+            'message': 'Juego reiniciado correctamente',
+            'tree_url': url
         })
 
+    @app.route('/format_game', methods=['GET'])
+    @cross_origin()
+    def format_game():
+        tree_controller.root = None
+        tree_controller.clear_data()
+        tree_controller.init_game()
+        tree_controller.getGraph("tree.dot")
+        url = tree_controller.upload_images("tree.dot.png")
+
+        return jsonify({
+            'message': 'Juego formateado correctamente',
+            'tree_url': url
+        })
+    
     if __name__ == '__main__':
         app.run(debug=True, host='0.0.0.0', port=3000)
