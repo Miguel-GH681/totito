@@ -1,0 +1,5 @@
+Flask
+graphviz
+cloudinary
+python-dotenv
+flask-cors
